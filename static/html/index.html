@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>主页</title>
+    <style>
+        #updateDiv {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+<h3>新增用户</h3>
+<form action="" method="post" id="addForm">
+    <input name="name" placeholder="用户名"><br/>
+    <input name="phone" placeholder="手机号">
+    <button type="button" onclick="addUser()">添加</button>
+</form>
+<hr/>
+<h3>查询用户</h3>
+<input id="searchKey" name="key" placeholder="查询用户的id或name或phone">
+<button type="button" onclick="searchUser(searchKey.value)">查询</button>
+
+<hr/>
+<div id="updateDiv">
+    <h3>变更用户</h3>
+    <form id="updateFrom">
+        <input type="hidden" name="id"><br/>
+        <input class="name" name="name" placeholder="用户名"><br/>
+        <input class="phone" name="phone" placeholder="手机号"><br/>
+        <button type="button" onclick="updateUser()">变更</button>
+    </form>
+</div>
+
+<div>
+    <ul id="userData">
+    </ul>
+</div>
+
+<script src="/static/js/jquery.min.js"></script>
+<script>
+    $(function () {
+        queryAll()
+    });
+
+    function searchUser(key) {
+        //alert(key);
+        //$('#updateDiv').css({display:'block'});
+        $('#updateDiv').hide();
+        $.getJSON('/user/?key=' + key, function (data) {
+            $('#updateDiv').fadeIn(1000);
+            alert(data.msg);
+            //将查询的结果显示
+            //两种方法
+            $('#updateFrom > input[name="id"]').val(data.user.id);
+            //$('#updateFrom').children('.name').val(data.user.name);
+            $('#updateFrom > input[name="name"]').val(data.user.name);
+            //$('#updateFrom').children('.phone').value=data.user.phone;
+            $('#updateFrom > input[name="phone"]').val(data.user.phone);
+
+        });
+        //$.ajax('/user/?key='+key, {
+        //   type: 'get',
+        //data:$('#searchKey').val()
+        //  dataType: 'json',
+        //   success: function (data) {
+        //      alert(data.user)
+        //  }
+        //})
+    }
+
+    //变更
+    function updateUser() {
+        alert('update User!');
+        $.ajax('/user/', {
+            type: 'put',
+            data: $('#updateFrom').serialize(),
+            dataType: 'json',
+            success: function (data) {
+                //alert(data.msg);
+                queryAll();
+                $('#updateDiv').hide()
+                //$.getJSON('/user/',function (data) {
+                //$('#updateDiv').hide();
+                //  alert('刷新成功')
+                //})
+                //alert('刷新成功！')
+            }
+        })
+    }
+
+    function queryAll() {
+        //alert('eeee');
+        $.getJSON('/user/', function (data) {
+            alert(data.msg)
+            if (data.static == 'ok') {
+                $('#userData').html('');    //清空原内容
+                for (var i = 0; i < data.data.length; i++) {
+                    //alert('efefefefef');
+                    user = data.data[i];
+                    alert(user);
+                    $('#userData').append('<li>' + user.name + ":" + user.phone + "<button onclick=delUser('" + user.id + "')>删除</button></li>")
+                }
+            }
+        });
+    }
+
+    function delUser(id) {
+        //alert(id);
+        $.ajax('/user/?id=' + id, {
+            type: 'DELETE', //大小写都可以
+            dataType: 'json',
+            success: function (data) {
+                alert(data.msg);
+                queryAll()
+            }
+        })
+
+    }
+
+    function addUser() {
+        //通过ajax方式上传表单数据
+        $.ajax('/user/', {
+            type: 'POST',
+            data: $('form').serialize(), //表单序列化,向后端发送的数据
+            dataType: 'json',    //响应的数据类型
+            success: function (data) {
+                //data -> { static:'ok',msg:'添加成功'}
+                alert(data.msg);
+                //alert($('#fff').serialize());
+                //alert(typeof $('#fff').serialize());
+                //window.opener.document.location.reload();
+                queryAll();
+                plshinput();
+            }
+        })
+    }
+
+    //初始化添加input值
+    function plshinput() {
+        $('#addForm > input[name="name"]').val('');
+        $('#addForm > input[name="phone"]').val('');
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>音乐主页</title>
+</head>
+<body>
+<h3>添加音乐</h3>
+<form id="addMusic">
+    <input name="name" placeholder="音乐名称"><br/>
+    <input name="url" placeholder="播放路径">
+    <button type="button" onclick="addMusic()">添加</button>
+</form>
+
+<hr/>
+<h3>所有音乐</h3>
+<hr/>
+<ul id="musicMC"></ul>
+
+<script src="/static/js/jquery.min.js"></script>
+<script>
+    $(function () {
+        allMusics()
+    });
+
+    function allMusics() {
+        $.getJSON('/musics/', function (data) {
+            alert(data.msg);
+            for (var i = 0; i < data.musics.length; i++) {
+                $('#musicMC').append("<li><a href='" + data.musics[i].url + "'>" + data.musics[i].name + "</a></li>")
+            }
+        })
+    }
+
+    function addMusic() {
+        $.ajax('/muscis/',{
+            type:'POST',
+            data:$('#addMusic').serialize(),
+            dataType:'json',
+            success:function (data) {
+                alert(data.msg);
+                allMusics();
+            }
+        })
+    }
+
+
+</script>
+</body>
+</html>
